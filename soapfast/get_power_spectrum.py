@@ -11,9 +11,16 @@ from scipy import special
 from sympy.physics.wigner import wigner_3j
 import random
 
+from utils import regression_utils
+
 ###############################################################################################################################
 
-def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,periodic=False,outfile='',subset=['NO',None],initial=-1,sparsefile='',sparse_options=[''],cen=[],spec=[],atomic=[False,None],all_radial=[1.0,0.0,0.0],useall=False,xyz_slice=[],verbose=True,get_imag=False,norm=True,electro=False,sigewald=1.0,single_radial=False,radsize=50,lebsize=146,average=False):
+def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,periodic=False,outfile='',subset=['NO',None],initial=-1,sparsefile='',sparse_options=[''],cen=[],spec=[],atomic=[False,None],all_radial=[1.0,0.0,0.0],useall=False,xyz_slice=[],verbose=True,get_imag=False,norm=True,electro=False,sigewald=1.0,single_radial=False,radsize=50,lebsize=146,average=False,use_lode=False):
+
+    if use_lode:
+        import utils.LODE.PS_utils as psutil
+    else:
+        import utils.PS_utils as psutil
 
     # If we want a slice of the coordinates, do this BEFORE anything else.
     if (len(xyz_slice)!=0):
@@ -136,9 +143,7 @@ def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,per
     start = time.time()
 
     # Compute power spectrum of order lambda
-    import os
-    pname = os.path.dirname(os.path.realpath(__file__))
-    if os.path.isfile(pname + "/utils/LODE/gvectors.so"):
+    if use_lode:
         [power,featsize] = psutil.compute_power_spectrum(nat,nneighmax,natmax,lam,lmax,npoints,nspecies,nnmax,nmax,llmax,lvalues,centers,all_indexes,all_species,coords,cell,rc,cw,sigma,sg,orthomatrix,sparse_options,all_radial,ncen,useall,verbose,electro,fixcell,sigewald,single_radial,radsize,lebsize,average)
     else:
         [power,featsize] = psutil.compute_power_spectrum(nat,nneighmax,natmax,lam,lmax,npoints,nspecies,nnmax,nmax,llmax,lvalues,centers,all_indexes,all_species,coords,cell,rc,cw,sigma,sg,orthomatrix,sparse_options,all_radial,ncen,useall,verbose)
@@ -300,29 +305,29 @@ def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,per
 
 ###############################################################################################################################
 
-def main():
+def main(use_lode=False):
 
     # This is a wrapper that calls python scripts to build lambda-SOAP power spectra for use by SA-GPR.
-    
+    if use_lode:
+        #import utils.LODE.PS_utils as psutil
+        import utils.LODE.parsing as parse
+    else:
+        #import utils.PS_utils as psutil
+        import utils.parsing as parse
+
     # Parse input arguments
     pname = os.path.dirname(os.path.realpath(__file__))
     if os.path.isfile(pname + "/utils/LODE/gvectors.so"):
         args = parse.add_command_line_arguments_PS("Calculate power spectrum")
         [nmax,lmax,rcut,sig,cen,spec,cweight,lam,periodic,ncut,sparsefile,frames,subset,sparse_options,outfile,initial,atomic,all_radial,useall,xyz_slice,get_imag,nonorm,electro,sigewald,single_radial,radsize,lebsize,average] = parse.set_variable_values_PS(args)
-        get_power_spectrum(lam,frames,nmax=nmax,lmax=lmax,rc=rcut,sg=sig,ncut=ncut,periodic=periodic,outfile=outfile,cw=cweight,subset=subset,initial=initial,sparsefile=sparsefile,sparse_options=sparse_options,cen=cen,spec=spec,atomic=atomic,all_radial=all_radial,useall=useall,xyz_slice=xyz_slice,get_imag=get_imag,norm=(not nonorm),electro=electro,sigewald=sigewald,single_radial=single_radial,radsize=radsize,lebsize=lebsize,average=average)
+        get_power_spectrum(lam,frames,nmax=nmax,lmax=lmax,rc=rcut,sg=sig,ncut=ncut,periodic=periodic,outfile=outfile,cw=cweight,subset=subset,initial=initial,sparsefile=sparsefile,sparse_options=sparse_options,cen=cen,spec=spec,atomic=atomic,all_radial=all_radial,useall=useall,xyz_slice=xyz_slice,get_imag=get_imag,norm=(not nonorm),electro=electro,sigewald=sigewald,single_radial=single_radial,radsize=radsize,lebsize=lebsize,average=average,use_lode=use_lode)
     else:
         args = parse.add_command_line_arguments_PS("Calculate power spectrum")
         [nmax,lmax,rcut,sig,cen,spec,cweight,lam,periodic,ncut,sparsefile,frames,subset,sparse_options,outfile,initial,atomic,all_radial,useall,xyz_slice,get_imag,nonorm] = parse.set_variable_values_PS(args)
-        get_power_spectrum(lam,frames,nmax=nmax,lmax=lmax,rc=rcut,sg=sig,ncut=ncut,periodic=periodic,outfile=outfile,cw=cweight,subset=subset,initial=initial,sparsefile=sparsefile,sparse_options=sparse_options,cen=cen,spec=spec,atomic=atomic,all_radial=all_radial,useall=useall,xyz_slice=xyz_slice,get_imag=get_imag,norm=(not nonorm))
+        get_power_spectrum(lam,frames,nmax=nmax,lmax=lmax,rc=rcut,sg=sig,ncut=ncut,periodic=periodic,outfile=outfile,cw=cweight,subset=subset,initial=initial,sparsefile=sparsefile,sparse_options=sparse_options,cen=cen,spec=spec,atomic=atomic,all_radial=all_radial,useall=useall,xyz_slice=xyz_slice,get_imag=get_imag,norm=(not nonorm),use_lode=use_lode)
 
 if __name__=="__main__":
-    from utils import regression_utils
     import os
     pname = os.path.dirname(os.path.realpath(__file__))
-    if os.path.isfile(pname + "/utils/LODE/gvectors.so"):
-        import utils.LODE.PS_utils as psutil
-        import utils.LODE.parsing as parse
-    else:
-        import utils.PS_utils as psutil
-        import utils.parsing as parse
-    main()
+    use_lode = os.path.isfile(pname + "/utils/LODE/gvectors.so")
+    main(use_lode)

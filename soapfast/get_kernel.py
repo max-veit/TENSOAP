@@ -30,8 +30,7 @@ def get_kernel(PS,scale=[],PS0=[None,None],zeta=1,output='',use_hermiticity=Fals
 
         featsize = [len(PS[0][0,0]),len(PS[1][0,0])]
         if (featsize[0] != featsize[1]):
-            print("ERROR: number of features must be the same for the two power spectra!")
-            sys.exit(0)
+            raise RuntimeError("ERROR: number of features must be the same for the two power spectra!")
         featsize = featsize[0]
 
         if (verbose):
@@ -58,8 +57,7 @@ def get_kernel(PS,scale=[],PS0=[None,None],zeta=1,output='',use_hermiticity=Fals
 
         featsize = [len(PS[0][0,0,0]),len(PS[1][0,0,0])]
         if (featsize[0] != featsize[1]):
-            print("ERROR: number of features must be the same for the two power spectra!")
-            sys.exit(0)
+            raise RuntimeError("ERROR: number of features must be the same for the two power spectra!")
         featsize = featsize[0]
 
         # Normalize by number of atoms

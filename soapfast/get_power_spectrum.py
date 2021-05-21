@@ -15,7 +15,7 @@ from utils import regression_utils
 
 ###############################################################################################################################
 
-def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,periodic=False,outfile='',subset=['NO',None],initial=-1,sparsefile='',sparse_options=[''],cen=[],spec=[],atomic=[False,None],all_radial=[1.0,0.0,0.0],useall=False,xyz_slice=[],verbose=True,get_imag=False,norm=True,electro=False,sigewald=1.0,single_radial=False,radsize=50,lebsize=146,average=False,use_lode=False):
+def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,periodic=False,outfile='',subset=['NO',None],initial=-1,sparsefile='',sparse_options=[''],cen=[],spec=[],atomic=[False,None],all_radial=[1.0,0.0,0.0],useall=False,xyz_slice=[],verbose=True,get_imag=False,norm=True,electro=False,sigewald=1.0,single_radial=False,radsize=50,lebsize=146,average=False,use_lode=False,write_file=True):
 
     if use_lode:
         import utils.LODE.PS_utils as psutil
@@ -257,7 +257,7 @@ def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,per
             power[i] = ps_row
 
     # Print power spectrum, if we have not asked for only a sample to be taken (we assume that taking a subset is just for the purpose of generating a sparsification)
-    if (subset[0] == 'NO'):
+    if (subset[0] == 'NO') and write_file:
         if (verbose):
             print("Saving power spectrum")
         PS_file = "PS"+str(lam)+"_nconf"+str(npoints)+"_sigma"+str(sg)+"_lmax"+str(lmax)+"_nmax"+str(nmax)+"_cutoff"+str(rc)+"_cweight"+str(cw)+"_ncut"+str(ncut)
@@ -297,7 +297,7 @@ def get_power_spectrum(lam,frames,nmax=8,lmax=6,rc=4.0,sg=0.3,ncut=-1,cw=1.0,per
         if not average:
             # Print number of atoms, to be used with kernel building
             np.save(PS_file + '_natoms.npy',nat)
-    
+
     if (verbose):
         print("Full calculation of power spectrum complete")
 
